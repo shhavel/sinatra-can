@@ -1,3 +1,4 @@
+require 'sinatra/base'
 require 'cancan'
 
 module Sinatra
