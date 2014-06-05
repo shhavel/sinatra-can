@@ -229,7 +229,7 @@ CanCan provides a lot of helpers, so this is just the start. The code is quite s
 
 ## License
 
-Copyright (c) 2011, Silvio Henrique Ferreira
+Copyright (c) 2011, Silvio Henrique Ferreira and individual contributors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
