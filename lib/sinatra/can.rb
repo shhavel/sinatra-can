@@ -91,7 +91,7 @@ module Sinatra
         if params[:id]
           instance = current_instance(params[:id], model)
         elsif current_operation == :list and model.respond_to? :accessible_by
-          collection = current_collection(model)
+          current_collection(model)
         end
 
         authorize! current_operation, instance || model
@@ -111,7 +111,7 @@ module Sinatra
       def current_instance(id, model, key = :id)
         instance = CanCan::ModelAdapters::AbstractAdapter.adapter_class(model).find(model, params[:id])
         error 404 unless instance
-        self.instance_variable_set("@#{instance_name(model)}", instance)
+        self.instance_variable_set(:"@#{instance_name(model)}", instance)
         instance
       rescue ActiveRecord::RecordNotFound
         error 404
@@ -119,11 +119,11 @@ module Sinatra
 
       def current_collection(model)
         collection = model.accessible_by(current_ability, current_operation)
-        self.instance_variable_set("@#{instance_name(model)}", collection)
+        self.instance_variable_set(:"@#{instance_name(model)}", collection)
       end
 
       def instance_name(model)
-        model.name.gsub(/([a-z\d])([A-Z])/,'\1_\2').downcase.split("::").last
+        model.name.gsub(/^.*::/, '').gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase
       end
 
       def current_operation
@@ -155,13 +155,11 @@ module Sinatra
     #     can :edit, Article
     #   end
     def ability(&block)
-      settings.local_ability.send :include, CanCan::Ability
-      settings.local_ability.send :define_method, :initialize, &block
+      settings.local_ability.__send__ :include, CanCan::Ability
+      settings.local_ability.__send__ :define_method, :initialize, &block
     end
 
-    def current_user_block
-      @current_user_block
-    end
+    attr_reader :current_user_block
 
     def self.registered(app)
       app.set(:can)   { |action, subject| condition { authorize!(action, subject) } }
